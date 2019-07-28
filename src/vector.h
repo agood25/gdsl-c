@@ -4,13 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { VEC_INIT_CAPACITY = 10 };
+#include "ds_def.h"
 
-typedef union vec_data {
-    int i;
-    double d;
-    char* c;
-} vec_data;
+enum { VEC_INIT_CAPACITY = 10 };
 
 typedef struct vector {
     vec_data* values;

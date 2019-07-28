@@ -5,7 +5,7 @@ add_library(gdsl-c "")
 add_executable(test-vec "")
 
 add_subdirectory("src")
-add_subdirectory("test")
+add_subdirectory("tests")
 
 set(MY_COMPILE_FLAGS -Wall -Wextra)
 
