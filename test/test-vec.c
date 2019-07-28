@@ -10,7 +10,7 @@ int main()
 
     vec_push_back(&vec, &var);
 
-    int i;
+    size_t i;
     for (i = 0; i < vec.size; ++i)
     {
         printf("%s\n",  vec.values[i].c);
