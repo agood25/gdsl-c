@@ -6,8 +6,10 @@ int vec_clear(vector* vec)
 
     if (vec->capacity > VEC_INIT_CAPACITY)
     {
-        vec->values = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
+        vec_data* temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
         if(NULL == vec->values) { return -1; }
+
+        vec->values = temp;
     }
 
     vec->capacity = VEC_INIT_CAPACITY;
@@ -44,12 +46,12 @@ int vec_init(vector* vec, size_t capacity)
     if (capacity == 0) { vec->capacity = VEC_INIT_CAPACITY; }
     else { vec->capacity = capacity; }
     
-     vec->values = (vec_data*) malloc(capacity*sizeof(vec_data));
+    vec->values = (vec_data*) malloc(vec->capacity*sizeof(vec_data));
 
-     if (NULL == vec->values) { return -1; }
+    if (NULL == vec->values) { return -1; }
  
-     vec->size = 0;
-     return 0;
+    vec->size = 0;
+    return 0;
 }
 
 void vec_pop_back(vector* vec)
@@ -59,7 +61,7 @@ void vec_pop_back(vector* vec)
     memset(&vec->values[vec->size], 0, sizeof(vec_data));
 }
 
-int vec_push_back(vector* vec, vec_data* new_data)
+int vec_push_back(vector* vec, vec_data new_data)
 {
     if (NULL == vec->values) 
     { 
@@ -68,11 +70,13 @@ int vec_push_back(vector* vec, vec_data* new_data)
     else if(vec->capacity == vec->size)
     {
         vec->capacity *=2;
-        vec->values = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
+        vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
         if(NULL == vec->values) { return -1; }
+
+        vec->values = temp;
     }
 
-    vec->values[vec->size] = *new_data;
+    vec->values[vec->size] = new_data;
     vec->size++;
 
     return 0;
@@ -84,8 +88,10 @@ int vec_reserve(vector* vec, size_t capacity)
     if (capacity <= vec->capacity) { return 0; }
 
     vec->capacity = capacity;
-    vec->values = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
+    vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
     if (NULL == vec->values) { return -1; }
+
+    vec->values = temp;
 
     return 0;
 }
