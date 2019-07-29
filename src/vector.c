@@ -34,7 +34,7 @@ void vec_erase_elem(vector* vec, size_t pos)
     size_t i;
     for(i = pos; i < vec->size-1; ++i)
     {
-        vec_swap_elem(vec, pos, pos+1);
+        vec_swap_elem(vec, i, i+1);
     }
 
     // remove the last element in the vector as it now holds to desired value to remove

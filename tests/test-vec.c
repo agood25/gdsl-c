@@ -8,7 +8,6 @@
 START_TEST(test_vec_clear)
 {
     vector vec = {0};
-    
 
     int i;
     for (i = 0; i < 10; ++i)
@@ -31,6 +30,35 @@ START_TEST(test_vec_clear)
     ck_assert_int_eq(vec.capacity, VEC_INIT_CAPACITY);
 
     ck_assert_int_eq(vec.values[0].i, 0);
+    free(vec.values);
+}
+END_TEST
+
+START_TEST(test_vec_erase_elem)
+{
+    vector vec = {0};
+    
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        vec_push_back(&vec, new_data);
+    }
+
+    vec_erase_elem(&vec, 5);
+    vec_erase_elem(&vec, 7);
+    vec_erase_elem(&vec, 14);
+
+    int expected[] = {0, 1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19};
+
+    for (i = 0; i < 17; ++i)
+    {
+        ck_assert_int_eq(vec.values[i].i, expected[i]);
+    }
+
+    ck_assert_int_eq(vec.size, 17);
+
     free(vec.values);
 }
 END_TEST
@@ -66,6 +94,7 @@ Suite* vec_suite(void)
     tc_core = tcase_create("Core");
 
     tcase_add_test(tc_core, test_vec_init);
+    tcase_add_test(tc_core, test_vec_erase_elem);
     tcase_add_test(tc_core, test_vec_clear);
     
     suite_add_tcase(s, tc_core);
