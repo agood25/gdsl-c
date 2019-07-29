@@ -26,8 +26,8 @@ START_TEST(test_vec_clear)
 
     vec_clear(&vec);
 
-    ck_assert_int_eq(vec.size, 0);
-    ck_assert_int_eq(vec.capacity, VEC_INIT_CAPACITY);
+    ck_assert_uint_eq(vec.size, 0);
+    ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY);
 
     ck_assert_int_eq(vec.values[0].i, 0);
     free(vec.values);
@@ -57,7 +57,7 @@ START_TEST(test_vec_erase_elem)
         ck_assert_int_eq(vec.values[i].i, expected[i]);
     }
 
-    ck_assert_int_eq(vec.size, 17);
+    ck_assert_uint_eq(vec.size, 17);
 
     free(vec.values);
 }
@@ -84,6 +84,90 @@ START_TEST(test_vec_init)
 }
 END_TEST
 
+START_TEST(test_vec_pop_back)
+{
+    vector vec = {0};
+    
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        vec_push_back(&vec, new_data);
+    }
+
+    vec_pop_back(&vec);
+    vec_pop_back(&vec);
+    vec_pop_back(&vec);
+    vec_pop_back(&vec);
+
+    int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+
+    for (i = 0; i < 16; ++i)
+    {
+        ck_assert_int_eq(vec.values[i].i, expected[i]);
+    }
+
+    ck_assert_uint_eq(vec.size, 16);
+
+    free(vec.values);
+}
+END_TEST
+
+START_TEST(test_vec_push_back)
+{
+    vector vec = {0};
+    
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        vec_push_back(&vec, new_data);
+    }
+
+    int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+
+    for (i = 0; i < 20; ++i)
+    {
+        ck_assert_int_eq(vec.values[i].i, expected[i]);
+    }
+
+    ck_assert_uint_eq(vec.size, 20);
+
+    free(vec.values);
+}
+END_TEST
+
+START_TEST(test_vec_reserve)
+{
+    vector vec = {0};
+
+    vec_reserve(&vec, 20);
+
+    ck_assert_uint_eq(vec.capacity, 20);
+
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        vec_push_back(&vec, new_data);
+    }
+
+    int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+
+    for (i = 0; i < 20; ++i)
+    {
+        ck_assert_int_eq(vec.values[i].i, expected[i]);
+    }
+
+    ck_assert_uint_eq(vec.size, 20);
+
+    free(vec.values);
+}
+END_TEST
+
 Suite* vec_suite(void)
 {
     Suite* s;
@@ -93,9 +177,15 @@ Suite* vec_suite(void)
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, test_vec_init);
-    tcase_add_test(tc_core, test_vec_erase_elem);
     tcase_add_test(tc_core, test_vec_clear);
+    tcase_add_test(tc_core, test_vec_erase_elem);
+    tcase_add_test(tc_core, test_vec_init);
+    tcase_add_test(tc_core, test_vec_pop_back);
+    tcase_add_test(tc_core, test_vec_push_back);
+    tcase_add_test(tc_core, test_vec_reserve);
+
+    
+    
     
     suite_add_tcase(s, tc_core);
 
