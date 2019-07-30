@@ -46,9 +46,11 @@ START_TEST(test_vec_erase_elem)
         ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
-    vec_erase_elem(&vec, 5);
-    vec_erase_elem(&vec, 7);
-    vec_erase_elem(&vec, 14);
+    ck_assert_int_eq(vec_erase_elem(&vec, 5), 0);
+    ck_assert_int_eq(vec_erase_elem(&vec, 7), 0);
+    ck_assert_int_eq(vec_erase_elem(&vec, 14), 0);
+
+    ck_assert_int_eq(vec_erase_elem(&vec, 20), -1);
 
     int expected[] = {0, 1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19};
 
@@ -87,6 +89,8 @@ END_TEST
 START_TEST(test_vec_pop_back)
 {
     vector vec = {0};
+
+    ck_assert_int_eq(vec_pop_back(&vec), -1);
     
     int i;
     for (i = 0; i < 20; ++i)
@@ -96,10 +100,10 @@ START_TEST(test_vec_pop_back)
         ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
-    vec_pop_back(&vec);
-    vec_pop_back(&vec);
-    vec_pop_back(&vec);
-    vec_pop_back(&vec);
+    ck_assert_int_eq(vec_pop_back(&vec), 0);
+    ck_assert_int_eq(vec_pop_back(&vec), 0);
+    ck_assert_int_eq(vec_pop_back(&vec), 0);
+    ck_assert_int_eq(vec_pop_back(&vec), 0);
 
     int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 

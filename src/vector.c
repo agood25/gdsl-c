@@ -26,9 +26,9 @@ int vec_clear(vector* vec)
     return 0;
 }
 
-void vec_erase_elem(vector* vec, size_t pos)
+int vec_erase_elem(vector* vec, size_t pos)
 {
-    if (NULL == vec->values || pos >= vec->size) { return; }
+    if (NULL == vec->values || pos >= vec->size) { return -1; }
 
     // move the desired pos value to the end of our vector
     size_t i;
@@ -39,6 +39,8 @@ void vec_erase_elem(vector* vec, size_t pos)
 
     // remove the last element in the vector as it now holds to desired value to remove
     vec_pop_back(vec);
+
+    return 0;
 }
 
 int vec_init(vector* vec, size_t capacity)
@@ -54,11 +56,13 @@ int vec_init(vector* vec, size_t capacity)
     return 0;
 }
 
-void vec_pop_back(vector* vec)
+int vec_pop_back(vector* vec)
 {
-    if (NULL == vec || vec->size == 0) { return; }
+    if (NULL == vec || vec->size == 0) { return -1; }
     vec->size--;
     memset(&vec->values[vec->size], 0, sizeof(vec_data));
+
+    return 0;
 }
 
 int vec_push_back(vector* vec, vec_data new_data)
