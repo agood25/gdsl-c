@@ -7,7 +7,7 @@ int vec_clear(vector* vec)
     if (vec->capacity > VEC_INIT_CAPACITY)
     {
         vec_data* temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
-        if(NULL == vec->values) { return -1; }
+        if(NULL == temp) { return -1; }
 
         vec->values = temp;
     }
@@ -71,7 +71,7 @@ int vec_push_back(vector* vec, vec_data new_data)
     {
         vec->capacity *=2;
         vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
-        if(NULL == vec->values) { return -1; }
+        if(NULL == temp) { return -1; }
 
         vec->values = temp;
     }
@@ -89,20 +89,22 @@ int vec_reserve(vector* vec, size_t capacity)
 
     vec->capacity = capacity;
     vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
-    if (NULL == vec->values) { return -1; }
+    if (NULL == temp) { return -1; }
 
     vec->values = temp;
 
     return 0;
 }
 
-void vec_swap_elem(vector* vec, size_t pos1, size_t pos2)
+int vec_swap_elem(vector* vec, size_t pos1, size_t pos2)
 {
-    if (NULL == vec->values || pos1 >= vec->size || pos2 >= vec->size) { return; }
+    if (NULL == vec->values || pos1 >= vec->size || pos2 >= vec->size) { return -1; }
 
     vec_data temp = vec->values[pos1];
     vec->values[pos1] = vec->values[pos2];
     vec->values[pos2] = temp;
+
+    return 0;
 }
 
 vec_data* vec_val_at(vector* vec, size_t pos)

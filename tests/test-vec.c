@@ -14,7 +14,7 @@ START_TEST(test_vec_clear)
     {
         vec_data new_data = {0};
         new_data.i = i;
-        vec_push_back(&vec, new_data);
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
     int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -24,7 +24,7 @@ START_TEST(test_vec_clear)
         ck_assert_int_eq(vec.values[i].i, expected[i]);
     }
 
-    vec_clear(&vec);
+    ck_assert_int_eq(vec_clear(&vec), 0);
 
     ck_assert_uint_eq(vec.size, 0);
     ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY);
@@ -43,7 +43,7 @@ START_TEST(test_vec_erase_elem)
     {
         vec_data new_data = {0};
         new_data.i = i;
-        vec_push_back(&vec, new_data);
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
     vec_erase_elem(&vec, 5);
@@ -93,7 +93,7 @@ START_TEST(test_vec_pop_back)
     {
         vec_data new_data = {0};
         new_data.i = i;
-        vec_push_back(&vec, new_data);
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
     vec_pop_back(&vec);
@@ -123,7 +123,7 @@ START_TEST(test_vec_push_back)
     {
         vec_data new_data = {0};
         new_data.i = i;
-        vec_push_back(&vec, new_data);
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
     int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
@@ -152,7 +152,7 @@ START_TEST(test_vec_reserve)
     {
         vec_data new_data = {0};
         new_data.i = i;
-        vec_push_back(&vec, new_data);
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
     }
 
     int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
@@ -162,6 +162,68 @@ START_TEST(test_vec_reserve)
         ck_assert_int_eq(vec.values[i].i, expected[i]);
     }
 
+    ck_assert_uint_eq(vec.size, 20);
+
+    free(vec.values);
+}
+END_TEST
+
+START_TEST(test_vec_swap_elem)
+{
+    vector vec = {0};
+
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
+    }
+
+    int expected[] = {11, 1, 2, 16, 4, 19, 6, 7, 8, 9, 10, 0, 12, 13, 14, 15, 3, 17, 18, 5};
+
+    ck_assert_int_eq(vec_swap_elem(&vec, 0, 11), 0);
+    ck_assert_int_eq(vec_swap_elem(&vec, 3, 16), 0);
+    ck_assert_int_eq(vec_swap_elem(&vec, 5, 19), 0);
+    
+    ck_assert_int_eq(vec_swap_elem(&vec, 20, 2), -1);
+
+    for (i = 0; i < 20; ++i)
+    {
+        ck_assert_int_eq(vec.values[i].i, expected[i]);
+    }
+
+    ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY*2);
+    ck_assert_uint_eq(vec.size, 20);
+
+    free(vec.values);
+}
+END_TEST
+
+START_TEST(test_vec_val_at)
+{
+    vector vec = {0};
+
+    int i;
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data new_data = {0};
+        new_data.i = i;
+        ck_assert_int_eq(vec_push_back(&vec, new_data), 0);
+    }
+
+    int expected[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+
+    for (i = 0; i < 20; ++i)
+    {
+        vec_data* data = vec_val_at(&vec, i);
+        ck_assert_ptr_ne(data, NULL);
+        ck_assert_int_eq(data->i, expected[i]);
+    }
+
+    ck_assert_ptr_eq(vec_val_at(&vec, 20), NULL);
+
+    ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY*2);
     ck_assert_uint_eq(vec.size, 20);
 
     free(vec.values);
@@ -183,6 +245,8 @@ Suite* vec_suite(void)
     tcase_add_test(tc_core, test_vec_pop_back);
     tcase_add_test(tc_core, test_vec_push_back);
     tcase_add_test(tc_core, test_vec_reserve);
+    tcase_add_test(tc_core, test_vec_swap_elem);
+    tcase_add_test(tc_core, test_vec_val_at);
 
     
     
