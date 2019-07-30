@@ -7,7 +7,9 @@ container. The data structures you plan to store must be defined in
 src/ds_def.h.
 
 Example usage:
-    - See EXAMPLES
+    
+* See EXAMPLES 
 
 The current working data structures include:
-    - vectors
+
+*  vectors
