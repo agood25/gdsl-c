@@ -1,5 +1,4 @@
-GDSL-C is an easy to use "generic" library of data structures written in C for
-Linux
+GDSL-C is an easy to use "generic" data structure library written in C
 
 It's not truely generic in the C++ template sense. It does, howerver, provide a
 straightforward mechanism for defining and using any data type within each 
