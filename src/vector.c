@@ -26,6 +26,17 @@ int vec_clear(vector* vec)
     return 0;
 }
 
+void vec_destroy(vector* vec)
+{
+    if(NULL != vec->values) 
+    { 
+        free(vec->values); 
+        vec->values = NULL;
+    }
+
+    memset(vec, 0, sizeof(vector));
+}
+
 int vec_erase_elem(vector* vec, size_t pos)
 {
     if (NULL == vec->values || pos >= vec->size) { return -1; }

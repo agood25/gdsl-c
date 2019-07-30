@@ -1,0 +1,59 @@
+Defining data types
+
+-- src/ds_def.h --
+
+typedef union vec_data {
+    int i;
+    char* c;
+} vec_data;
+
+----------
+
+
+Vector:
+
+    -- sample main.c --
+
+    #include "vector.h"
+    #include "ds_def.h"
+
+    int main()
+    {
+        vector vec_int = {0};
+        vector vec_char = {0};
+
+        vec_data int_data = {0};
+        vec_data char_data = {0};
+
+        int_data.i = 10;
+        char_data.c = "Hello";
+        vec_push_back(&vec_int, int_data);
+        vec_push_back(&vec_char, char_data);
+
+        int_data.i = 20;
+        char_data.c = "World";
+        vec_push_back(&vec_int, int_data);
+        vec_push_back(&vec_char, char_data);
+
+        size_t i;
+        for(i = 0; i < vec_int.size; ++i)
+        {
+            printf("%d\n", vec_int.values[i].i);
+        }
+
+        for(i = 0; i < vec_char.size; ++i)
+        {
+            printf("%s\n", vec_char.values[i].c);
+        }
+
+        vec_destroy(&vec_int);
+        vec_destroy(&vec_char);
+    }
+
+    ----------
+
+    output: 
+    10
+    20
+    Hello
+    World

@@ -1,0 +1,9 @@
+GDSL-C is an easy to use "generic" library of data structures written in C for Linux
+
+It's not truely generic in the C++ template sense.  It does, howerver, provide a straightforward mechanism for defining and using any data type within each container. The data structures you plan to store must be defined in src/ds_def.h.
+
+Example usage:
+    - See EXAMPLES
+
+The current working data structures include:
+    - vectors

@@ -16,6 +16,7 @@ typedef struct vector {
 } vector;
 
 int vec_clear(vector* vec);
+void vec_destroy(vector* vec);
 int vec_erase_elem(vector* vec, size_t pos);
 int vec_init(vector* vec, size_t capacity);
 int vec_pop_back(vector* vec);

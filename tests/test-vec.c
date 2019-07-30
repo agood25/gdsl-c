@@ -30,7 +30,7 @@ START_TEST(test_vec_clear)
     ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY);
 
     ck_assert_int_eq(vec.values[0].i, 0);
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -61,7 +61,7 @@ START_TEST(test_vec_erase_elem)
 
     ck_assert_uint_eq(vec.size, 17);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -81,8 +81,8 @@ START_TEST(test_vec_init)
     ck_assert_uint_eq(vec2.capacity, 1235);
     ck_assert_uint_eq(vec2.size, 0);
 
-    free(vec.values);
-    free(vec2.values);
+    vec_destroy(&vec);
+    vec_destroy(&vec2);
 }
 END_TEST
 
@@ -114,7 +114,7 @@ START_TEST(test_vec_pop_back)
 
     ck_assert_uint_eq(vec.size, 16);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -139,7 +139,7 @@ START_TEST(test_vec_push_back)
 
     ck_assert_uint_eq(vec.size, 20);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -147,7 +147,7 @@ START_TEST(test_vec_reserve)
 {
     vector vec = {0};
 
-    vec_reserve(&vec, 20);
+    ck_assert_int_eq(vec_reserve(&vec, 20), 0);
 
     ck_assert_uint_eq(vec.capacity, 20);
 
@@ -168,7 +168,7 @@ START_TEST(test_vec_reserve)
 
     ck_assert_uint_eq(vec.size, 20);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -200,7 +200,7 @@ START_TEST(test_vec_swap_elem)
     ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY*2);
     ck_assert_uint_eq(vec.size, 20);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
@@ -230,7 +230,7 @@ START_TEST(test_vec_val_at)
     ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY*2);
     ck_assert_uint_eq(vec.size, 20);
 
-    free(vec.values);
+    vec_destroy(&vec);
 }
 END_TEST
 
