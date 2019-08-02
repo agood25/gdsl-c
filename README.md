@@ -11,4 +11,5 @@ Example usage:
 
 The current working data structures include:
 
-*  vectors
+*  vector
+*  stack
