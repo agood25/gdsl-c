@@ -6,7 +6,7 @@ int vec_clear(vector* vec)
 
     if (vec->capacity > VEC_INIT_CAPACITY)
     {
-        vec_data* temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
+        vec_data* temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY*sizeof(vec_data));
         if(NULL == temp) { return -1; }
 
         vec->values = temp;

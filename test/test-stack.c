@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "stack.h"
-#include "ds_def.h"
+#include "gdsl_def.h"
 
 START_TEST(test_stack_clear)
 {

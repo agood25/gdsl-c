@@ -2,11 +2,11 @@
 
 int stack_clear(stack* s)
 {
-    if (!s || !s->values || s->size == 0) { return 0; }
-
+    if (NULL == s || NULL == s->values || s->size == 0) { return 0; }
+ 
     if (s->capacity > STACK_INIT_CAPACITY)
     {
-        stack_data* temp = (stack_data*) realloc(s->values, STACK_INIT_CAPACITY);
+        stack_data* temp = (stack_data*) realloc(s->values, STACK_INIT_CAPACITY*sizeof(stack_data));
         if(NULL == temp) { return -1; }
 
         s->values = temp;
@@ -28,7 +28,7 @@ int stack_clear(stack* s)
 
 int stack_destroy(stack* s)
 {
-    if (!s) { return -1; }
+    if (NULL == s) { return -1; }
 
     if(NULL != s->values) 
     { 
@@ -43,7 +43,7 @@ int stack_destroy(stack* s)
 
 int stack_init(stack* s, size_t capacity)
 {
-    if (!s) { return -1; }
+    if (NULL == s) { return -1; }
 
     if (capacity == 0) { s->capacity = STACK_INIT_CAPACITY; }
     else { s->capacity = capacity; }
@@ -58,7 +58,7 @@ int stack_init(stack* s, size_t capacity)
 
 int stack_push(stack* s, stack_data new_data)
 {
-    if (!s) { return -1; }
+    if (NULL == s) { return -1; }
 
     if (NULL == s->values) 
     { 
@@ -82,7 +82,7 @@ int stack_push(stack* s, stack_data new_data)
 
 int stack_pop(stack* s)
 {
-    if (!s || !s->values || s->size == 0) { return -1; }
+    if (NULL == s || NULL == s->values || s->size == 0) { return -1; }
     s->size--;
     memset(&s->values[s->size], 0, sizeof(stack_data));
 
@@ -91,7 +91,7 @@ int stack_pop(stack* s)
 
 int stack_reserve(stack* s, size_t capacity)
 {
-    if (!s || !s->values) { return stack_init(s, capacity); }
+    if (NULL == s || NULL == s->values) { return stack_init(s, capacity); }
     if (capacity <= s->capacity) { return 0; }
 
     s->capacity = capacity;
@@ -105,7 +105,7 @@ int stack_reserve(stack* s, size_t capacity)
 
 stack_data* stack_top(stack* s)
 {
-    if (!s || !s->values || s->size == 0) { return NULL; }
+    if (NULL == s || NULL == s->values || s->size == 0) { return NULL; }
 
     return &s->values[s->size-1];
 }

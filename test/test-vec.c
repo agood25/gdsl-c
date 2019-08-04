@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "vector.h"
-#include "ds_def.h"
+#include "gdsl_def.h"
 
 START_TEST(test_vec_clear)
 {

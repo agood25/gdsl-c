@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ds_def.h"
+#include "gdsl_def.h"
 
 enum { STACK_INIT_CAPACITY = 10 };
 

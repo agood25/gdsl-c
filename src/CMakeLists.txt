@@ -1,6 +1,8 @@
 target_sources(gdsl-c
     PUBLIC
-        ds_def.h
+        gdsl_def.h
+        hashmap.c
+        hashmap.h
         stack.c
         stack.h
         vector.c

@@ -30,5 +30,6 @@ endfunction(generate_test_executable)
 
 generate_test_executable(stack)
 generate_test_executable(vec)
+generate_test_executable(hashmap)
 
 
