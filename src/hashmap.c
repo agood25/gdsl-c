@@ -1,43 +1,40 @@
 #include "hashmap.h"
 
 
-int hashmap_clear(hashmap* hm)
+int hashmap_clear(hashmap** hm)
 {
-    if (NULL == hm || NULL == hm->key_values || hm->size == 0) { return 0; }
+    if (NULL == hm || NULL == (*hm)->key_values || (*hm)->size == 0) { return 0; }
 
-    if (hm->capacity > HASHMAP_INIT_CAPACITY)
+    hashmap_destroy_key_val(hm);
+
+    if ((*hm)->capacity > HASHMAP_INIT_CAPACITY)
     {
-        hashmap_key_val* temp = (hashmap_key_val*) realloc(hm->key_values, HASHMAP_INIT_CAPACITY*sizeof(hashmap_key_val));
+        hashmap_key_val* temp = (hashmap_key_val*) calloc(HASHMAP_INIT_CAPACITY, sizeof(hashmap_key_val));
         if(NULL == temp) { return -1; }
 
-        hm->key_values = temp;
+        (*hm)->key_values = temp;
     }
 
-    hm->capacity = HASHMAP_INIT_CAPACITY;
-    if (hm->size > hm->capacity) { hm->size = hm->capacity; }
+    (*hm)->capacity = HASHMAP_INIT_CAPACITY;
+    if ((*hm)->size > (*hm)->capacity) { (*hm)->size = (*hm)->capacity; }
     
     size_t i;
-    for (i = 0; i < hm->size; ++i)
+    for (i = 0; i < (*hm)->size; ++i)
     {
-        memset(&hm->key_values[i], 0, sizeof(hashmap_key_val));
+        memset(&(*hm)->key_values[i], 0, sizeof(hashmap_key_val));
     }
 
-    hm->size = 0;
+    (*hm)->size = 0;
 
     return 0;
 }
 
 int hashmap_destroy(hashmap** hm)
 {
-    if (NULL == hm) { return -1; }
-
-    if(NULL != (*hm)->key_values) 
-    { 
-        free((*hm)->key_values); 
-        (*hm)->key_values = NULL;
-    }
-
-    memset(hm, 0, sizeof(hashmap));
+    if (-1 == hashmap_destroy_key_val(hm)) { return -1; }
+    
+    free(*hm);
+    hm = NULL;
 
     return 0;
 }
@@ -103,61 +100,81 @@ hashmap_key_val* hashmap_find(hashmap* hm, const char* key)
     return NULL;
 }
 
-int hashmap_init(hashmap* hm, size_t capacity)
+hashmap* hashmap_init(size_t capacity, int (*val_free_func)(hashmap_data** data), int (*val_copy_func)(hashmap_data* dst, hashmap_data* src))
 {
-    if (capacity == 0) { hm->capacity = (size_t) ceilf(HASHMAP_INIT_CAPACITY); }
-    else { hm->capacity = (size_t) ceilf(capacity); }
+    hashmap* ret = (hashmap*) malloc(sizeof(hashmap));
+    if (NULL == ret) { return NULL; }
+
+    if (capacity == 0) { ret->capacity = (size_t) ceilf(HASHMAP_INIT_CAPACITY); }
+    else { ret->capacity = (size_t) ceilf(capacity); }
     
-    hm->key_values = (hashmap_key_val*) malloc(hm->capacity*sizeof(hashmap_key_val));
+    ret->key_values = (hashmap_key_val*) calloc(ret->capacity, sizeof(hashmap_key_val));
 
-    if (NULL == hm->key_values) { return -1; }
+    if (NULL == ret->key_values) { return NULL; }
+
+    if (NULL == *val_free_func) { ret->val_free_func = NULL; }
+    else { ret->val_free_func = val_free_func; }
+
+    if (NULL == *val_copy_func) { ret->val_copy_func = NULL; }
+    else { ret->val_copy_func = val_copy_func; }
  
-    hm->size = 0;
+    ret->size = 0;
 
-    return 0;
+    return ret;
 }
 
-int hashmap_insert(hashmap* hm, hashmap_key_val hmkv)
+int hashmap_insert(hashmap** hm, hashmap_key_val hmkv)
 {
-    // initialize the hashmap key values if neccesary
-    if (NULL == hm->key_values) { if (-1 == hashmap_init(hm, 0)) { return -1; } }
+    // hashmap must be initialized via hashmap_init 
+    if (NULL == hm || NULL == *hm || NULL == (*hm)->key_values)  { return -1;  }
 
     // resize the hashmap if the size exceeds the capacity * the load factor
-    if(hm->size+1 > (size_t) hm->capacity*HASHMAP_LOAD_FACTOR)
+    if((*hm)->size+1 > (size_t) (*hm)->capacity*HASHMAP_LOAD_FACTOR)
     {
         // resize the key_values and re-insert all of the values currently in the hash map
-        if (-1 == hashmap_reserve(&hm, hm->capacity*hm->capacity)) { return -1; }
+        if (-1 == hashmap_reserve(hm, (*hm)->capacity*(*hm)->capacity)) { return -1; }
     }
 
-    size_t hash_val = hashmap_get_hash(hmkv.key) % hm->capacity;
+    size_t hash_val = hashmap_get_hash(hmkv.key) % (*hm)->capacity;
 
     // find the next available slot to insert our key value
-    while(NULL != hm->key_values[hash_val].key) { hash_val = (hash_val + 1) % hm->capacity; }
+    while(NULL != (*hm)->key_values[hash_val].key) { hash_val = (hash_val + 1) % (*hm)->capacity; }
     
-    hm->key_values[hash_val] = hmkv;
-    hm->size++;
+    (*hm)->key_values[hash_val] = hmkv;
+    (*hm)->size++;
 
     return 0;
 }
 
 int hashmap_reserve(hashmap** hm, size_t capacity)
 {
-    if (NULL == *hm || 0 == capacity) { return -1; }
+    if (NULL == hm || NULL == *hm || NULL == (*hm)->key_values || 0 == capacity) { return -1; }
 
      // resize the key_values and re-insert all of the values currently in the hash map
-    hashmap* temp_hashmap = (hashmap*) malloc(sizeof(hashmap));
+    hashmap* temp_hashmap = hashmap_init(capacity, (*hm)->val_free_func, (*hm)->val_copy_func);
     if (NULL == temp_hashmap) { return -1; }
 
-    if (-1 == hashmap_init(temp_hashmap, capacity)) { return -1; }
-    
     size_t i;
     for (i = 0; i < (*hm)->capacity; ++i)
     {
+        hashmap_key_val* curr_kv = &(*hm)->key_values[i];
+
         // ignore all empty entries
-        if(NULL == (*hm)->key_values[i].key) { continue; }
+        if(NULL == curr_kv->key) { continue; }
+
+        hashmap_key_val temp_kv = {0};
+
+        if(NULL == temp_hashmap->val_copy_func) { temp_kv.value = curr_kv->value; }
+        else { ((*temp_hashmap->val_copy_func)(&temp_kv.value, &curr_kv->value)); }
+
+        char* copy_key = (char*) calloc(strlen(curr_kv->key) + 1, sizeof(char));
+        if (NULL == copy_key) { return -1; }
+        strncpy(copy_key, curr_kv->key, strlen(curr_kv->key) + 1);
+
+        temp_kv.key = copy_key;
 
         // re-insert values into the temporary hashmap
-        if (-1 == hashmap_insert(temp_hashmap, (*hm)->key_values[i])) { return -1; }
+        if (-1 == hashmap_insert(&temp_hashmap, temp_kv)) { return -1; }
     }
 
     // after resizeing, destroy the old hashmap and set it to the temp hashmap
@@ -191,6 +208,32 @@ static int hashmap_swap_key_val(hashmap_key_val* hmkv1, hashmap_key_val* hmkv2)
 
     hmkv2->value = temp.value;
     hmkv2->key = temp.key;
+
+    return 0;
+}
+
+static int hashmap_destroy_key_val(hashmap** hm)
+{
+    if (NULL == hm || NULL == *hm) { return -1; }
+
+    if(NULL != (*hm)->key_values) 
+    {
+        uint32_t i;
+        for (i = 0; i < (*hm)->capacity; ++i)
+        {
+            if (NULL == (*hm)->key_values[i].key) { continue; }
+            
+            free((*hm)->key_values[i].key);
+            (*hm)->key_values[i].key = NULL;
+
+            if (NULL == (*(*hm)->val_free_func)) { continue; }
+            hashmap_data* curr_val = &(*hm)->key_values[i].value;
+            (*(*hm)->val_free_func) (&curr_val);
+        }
+
+        free((*hm)->key_values); 
+        (*hm)->key_values = NULL;
+    }
 
     return 0;
 }

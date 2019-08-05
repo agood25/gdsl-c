@@ -19,27 +19,36 @@ char* get_key_from_uint32(uint32_t uint32_key)
 
 START_TEST(test_hm_clear)
 {
-    hashmap hm = {0};
+    hashmap* hm = hashmap_init(0, NULL, NULL);
+    if (NULL == hm) { ck_assert(false); } 
+
+    int ret;
 
     uint32_t i;
     for (i = 0; i < 10; ++i)
     {
         hashmap_data new_data = {0};
         new_data.i = i;
-        char* key = get_key_from_uint32(i);
-        if (NULL == key) { ck_assert(false); }
 
         hashmap_key_val kv = {0};
         kv.value = new_data;
-        kv.key = key;
-
-        ck_assert_int_eq(hashmap_insert(&hm, kv), 0);
+        char* next_key = get_key_from_uint32(i);
+        kv.key = next_key;
+        
+        ret = hashmap_insert(&hm, kv);
+        ck_assert_int_eq(ret, 0);
     }
 
-    ck_assert_int_eq(hashmap_clear(&hm), 0);
+    ck_assert_uint_eq(hm->size, 10);
+    ck_assert_uint_eq(hm->capacity, HASHMAP_INIT_CAPACITY*HASHMAP_INIT_CAPACITY);
+    
+    ret = hashmap_clear(&hm);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_uint_eq(hm->size, 0);
+    ck_assert_uint_eq(hm->capacity, HASHMAP_INIT_CAPACITY);
 
-    ck_assert_int_eq(hm.size, 0);
-    ck_assert_int_eq(hm.capacity, HASHMAP_INIT_CAPACITY);
+    ret = hashmap_destroy(&hm);
+    ck_assert_int_eq(ret, 0);
 }
 END_TEST
 
@@ -271,32 +280,36 @@ Suite* hm_suite(void)
 
 int main()
 {
-    hashmap hm = {0};
 
-    uint32_t i;
-    for (i = 0; i < 10; ++i)
-    {
-        hashmap_data new_data = {0};
-        new_data.i = i;
-        char* key = get_key_from_uint32(i);
+    // hashmap* hm = hashmap_init(0, NULL, NULL);
 
-        hashmap_key_val kv = {0};
-        kv.value = new_data;
-        kv.key = key;
-        hashmap_insert(&hm, kv);
-    }
-    
-    hashmap_clear(&hm);
+    // uint32_t i;
+    // for (i = 0; i < 10; ++i)
+    // {
+    //     hashmap_data new_data = {0};
+    //     new_data.i = i;
 
-    // int number_failed;
-    // Suite* s;
-    // SRunner* sr;
+    //     hashmap_key_val kv = {0};
+    //     kv.value = new_data;
+    //     char* next_key = get_key_from_uint32(i);
+    //     kv.key = next_key;
+        
+    //     hashmap_insert(&hm, kv);
+    // }
 
-    // s = hm_suite();
-    // sr = srunner_create(s);
+    // hashmap_clear(&hm);
 
-    // srunner_run_all(sr, CK_NORMAL);
-    // number_failed = srunner_ntests_failed(sr);
-    // srunner_free(sr);
-    // return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    // hashmap_destroy(&hm);
+
+    int number_failed;
+    Suite* s;
+    SRunner* sr;
+
+    s = hm_suite();
+    sr = srunner_create(s);
+
+    srunner_run_all(sr, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 } 
