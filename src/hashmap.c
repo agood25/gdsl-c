@@ -1,42 +1,119 @@
 #include "hashmap.h"
 
-
-int hashmap_clear(hashmap** hm)
+// djb2 hashing algorithm
+static size_t hashmap_get_hash(const char* key)
 {
-    if (NULL == hm || NULL == (*hm)->key_values || (*hm)->size == 0) { return 0; }
+    if (NULL == key) { return SIZE_MAX; }
+
+    size_t hash = 5381;
+    int c;
+
+    while ((c = *key++)) { hash = ((hash << 5) + hash) + c; } // hash * 33 + c
+
+    return hash;
+}
+
+static int hashmap_swap_key_val(hashmap_key_val* hmkv1, hashmap_key_val* hmkv2)
+{
+    if (NULL == hmkv1 || NULL == hmkv2) { return -1; }
+
+    hashmap_key_val temp = *hmkv1;
+
+    hmkv1->value = hmkv2->value;
+    hmkv1->key = hmkv2->key;
+
+    hmkv2->value = temp.value;
+    hmkv2->key = temp.key;
+
+    return 0;
+}
+
+static int hashmap_destroy_key_val(hashmap* hm)
+{
+    if (NULL == hm ) { return -1; }
+
+    if(NULL != hm->key_values) 
+    {
+        uint32_t i;
+        for (i = 0; i < hm->capacity; ++i)
+        {
+            if (NULL == hm->key_values[i].key) { continue; }
+            
+            free(hm->key_values[i].key);
+            hm->key_values[i].key = NULL;
+
+            if (NULL == (*hm->val_free_func)) { continue; }
+            hashmap_data* curr_val = &hm->key_values[i].value;
+            (*hm->val_free_func) (&curr_val);
+        }
+
+        free(hm->key_values); 
+        hm->key_values = NULL;
+    }
+
+    return 0;
+}
+
+static int hashmap_destroy_ext(hashmap** hm, bool destroy_kv)
+{
+    if (destroy_kv) { if (-1 == hashmap_destroy_key_val(*hm)) { return -1; } }
+    
+    free(*hm);
+    *hm = NULL;
+
+    return 0;
+}
+
+static int hashmap_copy_and_free_kv(hashmap* hm, hashmap_key_val* dst, hashmap_key_val* src)
+{
+    if (NULL == hm || NULL == dst || NULL == src) { return -1; }
+
+    // copy the old value
+    if(NULL == hm->val_copy_func) { dst->value = src->value; }
+    else { ((*hm->val_copy_func)(&dst->value, &src->value)); }
+
+    // free the old value if neccesary
+    if (NULL != (*hm->val_free_func)) 
+    {   
+        hashmap_data* rm_data = &src->value; 
+        (*hm->val_free_func) (&rm_data); 
+    }
+
+    // copy the old key
+    dst->key = (char*) calloc(strlen(src->key) + 1, sizeof(char));
+    if (NULL == dst->key) { return -1; }
+    strncpy(dst->key, src->key, strlen(src->key) + 1);
+
+    // free the old key
+    free(src->key);
+    src->key = NULL;
+
+    return 0;
+}
+
+int hashmap_clear(hashmap* hm)
+{
+    if (NULL == hm || NULL == hm->key_values || hm->size == 0) { return 0; }
 
     hashmap_destroy_key_val(hm);
 
-    if ((*hm)->capacity > HASHMAP_INIT_CAPACITY)
+    if (hm->capacity > HASHMAP_INIT_CAPACITY)
     {
         hashmap_key_val* temp = (hashmap_key_val*) calloc(HASHMAP_INIT_CAPACITY, sizeof(hashmap_key_val));
         if(NULL == temp) { return -1; }
 
-        (*hm)->key_values = temp;
+        hm->key_values = temp;
     }
 
-    (*hm)->capacity = HASHMAP_INIT_CAPACITY;
-    if ((*hm)->size > (*hm)->capacity) { (*hm)->size = (*hm)->capacity; }
-    
-    size_t i;
-    for (i = 0; i < (*hm)->size; ++i)
-    {
-        memset(&(*hm)->key_values[i], 0, sizeof(hashmap_key_val));
-    }
-
-    (*hm)->size = 0;
+    hm->capacity = HASHMAP_INIT_CAPACITY;
+    hm->size = 0;
 
     return 0;
 }
 
 int hashmap_destroy(hashmap** hm)
 {
-    if (-1 == hashmap_destroy_key_val(hm)) { return -1; }
-    
-    free(*hm);
-    hm = NULL;
-
-    return 0;
+    return hashmap_destroy_ext(hm, true);
 }
 
 int hashmap_erase_elem(hashmap* hm, const char* key)
@@ -126,7 +203,7 @@ hashmap* hashmap_init(size_t capacity, int (*val_free_func)(hashmap_data** data)
 int hashmap_insert(hashmap** hm, hashmap_key_val hmkv)
 {
     // hashmap must be initialized via hashmap_init 
-    if (NULL == hm || NULL == *hm || NULL == (*hm)->key_values)  { return -1;  }
+    if (NULL == hm || NULL == *hm || NULL == (*hm)->key_values)  { return -1; }
 
     // resize the hashmap if the size exceeds the capacity * the load factor
     if((*hm)->size+1 > (size_t) (*hm)->capacity*HASHMAP_LOAD_FACTOR)
@@ -163,77 +240,15 @@ int hashmap_reserve(hashmap** hm, size_t capacity)
         if(NULL == curr_kv->key) { continue; }
 
         hashmap_key_val temp_kv = {0};
-
-        if(NULL == temp_hashmap->val_copy_func) { temp_kv.value = curr_kv->value; }
-        else { ((*temp_hashmap->val_copy_func)(&temp_kv.value, &curr_kv->value)); }
-
-        char* copy_key = (char*) calloc(strlen(curr_kv->key) + 1, sizeof(char));
-        if (NULL == copy_key) { return -1; }
-        strncpy(copy_key, curr_kv->key, strlen(curr_kv->key) + 1);
-
-        temp_kv.key = copy_key;
+        if (-1 == hashmap_copy_and_free_kv(*hm, &temp_kv, curr_kv)) { return -1; }
 
         // re-insert values into the temporary hashmap
         if (-1 == hashmap_insert(&temp_hashmap, temp_kv)) { return -1; }
     }
 
     // after resizeing, destroy the old hashmap and set it to the temp hashmap
-    if (-1 == hashmap_destroy(hm)) { return -1; }
+    if (-1 == hashmap_destroy_ext(hm, false)) { return -1; }
     *hm = temp_hashmap;
-
-    return 0;
-}
-
-// djb2 hashing algorithm
-static size_t hashmap_get_hash(const char* key)
-{
-    if (NULL == key) { return SIZE_MAX; }
-
-    size_t hash = 5381;
-    int c;
-
-    while ((c = *key++)) { hash = ((hash << 5) + hash) + c; } // hash * 33 + c
-
-    return hash;
-}
-
-static int hashmap_swap_key_val(hashmap_key_val* hmkv1, hashmap_key_val* hmkv2)
-{
-    if (NULL == hmkv1 || NULL == hmkv2) { return -1; }
-
-    hashmap_key_val temp = *hmkv1;
-
-    hmkv1->value = hmkv2->value;
-    hmkv1->key = hmkv2->key;
-
-    hmkv2->value = temp.value;
-    hmkv2->key = temp.key;
-
-    return 0;
-}
-
-static int hashmap_destroy_key_val(hashmap** hm)
-{
-    if (NULL == hm || NULL == *hm) { return -1; }
-
-    if(NULL != (*hm)->key_values) 
-    {
-        uint32_t i;
-        for (i = 0; i < (*hm)->capacity; ++i)
-        {
-            if (NULL == (*hm)->key_values[i].key) { continue; }
-            
-            free((*hm)->key_values[i].key);
-            (*hm)->key_values[i].key = NULL;
-
-            if (NULL == (*(*hm)->val_free_func)) { continue; }
-            hashmap_data* curr_val = &(*hm)->key_values[i].value;
-            (*(*hm)->val_free_func) (&curr_val);
-        }
-
-        free((*hm)->key_values); 
-        (*hm)->key_values = NULL;
-    }
 
     return 0;
 }

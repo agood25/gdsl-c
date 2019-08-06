@@ -42,7 +42,7 @@ START_TEST(test_hm_clear)
     ck_assert_uint_eq(hm->size, 10);
     ck_assert_uint_eq(hm->capacity, HASHMAP_INIT_CAPACITY*HASHMAP_INIT_CAPACITY);
     
-    ret = hashmap_clear(&hm);
+    ret = hashmap_clear(hm);
     ck_assert_int_eq(ret, 0);
     ck_assert_uint_eq(hm->size, 0);
     ck_assert_uint_eq(hm->capacity, HASHMAP_INIT_CAPACITY);
@@ -281,35 +281,36 @@ Suite* hm_suite(void)
 int main()
 {
 
-    // hashmap* hm = hashmap_init(0, NULL, NULL);
+    hashmap* hm = hashmap_init(0, NULL, NULL);
 
-    // uint32_t i;
-    // for (i = 0; i < 10; ++i)
-    // {
-    //     hashmap_data new_data = {0};
-    //     new_data.i = i;
+    uint32_t i;
+    for (i = 0; i < 10; ++i)
+    {
+        hashmap_data new_data = {0};
+        new_data.i = i;
 
-    //     hashmap_key_val kv = {0};
-    //     kv.value = new_data;
-    //     char* next_key = get_key_from_uint32(i);
-    //     kv.key = next_key;
+        hashmap_key_val kv = {0};
+        kv.value = new_data;
+        char* next_key = get_key_from_uint32(i);
+        kv.key = next_key;
         
-    //     hashmap_insert(&hm, kv);
-    // }
+        hashmap_insert(&hm, kv);
+    }
 
-    // hashmap_clear(&hm);
+    hashmap_clear(hm);
 
-    // hashmap_destroy(&hm);
+    hashmap_destroy(&hm);
+    printf("Return\n");
 
-    int number_failed;
-    Suite* s;
-    SRunner* sr;
+    // int number_failed;
+    // Suite* s;
+    // SRunner* sr;
 
-    s = hm_suite();
-    sr = srunner_create(s);
+    // s = hm_suite();
+    // sr = srunner_create(s);
 
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+    // srunner_run_all(sr, CK_NORMAL);
+    // number_failed = srunner_ntests_failed(sr);
+    // srunner_free(sr);
+    // return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 } 
