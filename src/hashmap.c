@@ -247,7 +247,8 @@ int hashmap_reserve(hashmap** hm, size_t capacity)
     }
 
     // after resizeing, destroy the old hashmap and set it to the temp hashmap
-    if (-1 == hashmap_destroy_ext(hm, false)) { return -1; }
+    if (-1 == hashmap_destroy_ext(hm, true)) { return -1; }
+    
     *hm = temp_hashmap;
 
     return 0;
