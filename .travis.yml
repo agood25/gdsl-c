@@ -1,0 +1,18 @@
+language: c
+
+stages:
+  - build
+  - test
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - mkdir build
+        - cd build
+        - cmake ../
+        - cmake --build .
+
+    - stage: test
+      script:
+        - echo "hello world!"
