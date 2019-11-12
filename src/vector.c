@@ -14,7 +14,7 @@ int vec_clear(vector *vec)
 
     vec->capacity = VEC_INIT_CAPACITY;
     if (vec->size > vec->capacity) { vec->size = vec->capacity; }
-    
+
     size_t i;
     for (i = 0; i < vec->size; ++i)
     {
@@ -28,9 +28,18 @@ int vec_clear(vector *vec)
 
 void vec_destroy(vector *vec)
 {
-    if(NULL != vec->values) 
-    { 
-        free(vec->values); 
+    if(vec->values)
+    {
+        if(vec->free_vec_data) // call the user defined free function if it is set on each item added
+        {
+            size_t i;
+            for(i = 0; i < vec->size; ++i)
+            {
+                vec->free_vec_data(&vec->values[i]);
+            }
+        }
+
+        free(vec->values);
         vec->values = NULL;
     }
 
@@ -54,7 +63,7 @@ int vec_erase_elem(vector *vec, size_t pos)
     return 0;
 }
 
-int vec_init(vector *vec, size_t capacity)
+int vec_init(vector *vec, size_t capacity, void (*free_function)(vec_data *))
 {
     if (capacity == 0) { vec->capacity = VEC_INIT_CAPACITY; }
     else { vec->capacity = capacity; }
@@ -62,6 +71,8 @@ int vec_init(vector *vec, size_t capacity)
     vec->values = (vec_data *) malloc(vec->capacity*sizeof(vec_data));
 
     if (NULL == vec->values) { return -1; }
+
+    vec->free_vec_data = free_function;
  
     vec->size = 0;
     return 0;
@@ -80,12 +91,12 @@ int vec_push_back(vector *vec, vec_data new_data)
 {
     if (NULL == vec->values) 
     { 
-        if (vec_init(vec, 0) == -1) { return -1; }
+        if (vec_init(vec, 0, NULL) == -1) { return -1; }
     }
     else if(vec->capacity == vec->size)
     {
-        vec->capacity *=2;
-        vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
+        vec->capacity *= 2;
+        vec_data *temp = (vec_data *) realloc(vec->values, vec->capacity*sizeof(vec_data));
         if(NULL == temp) { return -1; }
 
         vec->values = temp;
@@ -99,11 +110,11 @@ int vec_push_back(vector *vec, vec_data new_data)
 
 int vec_reserve(vector *vec, size_t capacity)
 {
-    if (NULL == vec->values) { return vec_init(vec, capacity); }
+    if (NULL == vec->values) { return vec_init(vec, capacity, NULL); }
     if (capacity <= vec->capacity) { return 0; }
 
     vec->capacity = capacity;
-    vec_data *temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
+    vec_data *temp = (vec_data *) realloc(vec->values, vec->capacity*sizeof(vec_data));
     if (NULL == temp) { return -1; }
 
     vec->values = temp;

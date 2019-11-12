@@ -6,7 +6,7 @@ add_library(gdsl-c "")
 add_subdirectory("src")
 add_subdirectory("test")
 
-set(MY_COMPILE_FLAGS -Wall -Wextra)
+set(MY_COMPILE_FLAGS -Wall -Wextra -pedantic)
 
 target_compile_options(gdsl-c PRIVATE ${MY_COMPILE_FLAGS})
 

@@ -70,14 +70,14 @@ START_TEST(test_vec_init)
     vector vec = {0};
     ck_assert_ptr_eq(vec.values, NULL);
 
-    ck_assert_int_eq(vec_init(&vec, 0), 0);
+    ck_assert_int_eq(vec_init(&vec, 0, NULL), 0);
     ck_assert_ptr_ne(vec.values, NULL);
     ck_assert_uint_eq(vec.capacity, VEC_INIT_CAPACITY);
     ck_assert_uint_eq(vec.size, 0);
 
     vector vec2 = {0};
 
-    ck_assert_int_eq(vec_init(&vec2, 1235), 0);
+    ck_assert_int_eq(vec_init(&vec2, 1235, NULL), 0);
     ck_assert_uint_eq(vec2.capacity, 1235);
     ck_assert_uint_eq(vec2.size, 0);
 
@@ -234,6 +234,53 @@ START_TEST(test_vec_val_at)
 }
 END_TEST
 
+void free_char(vec_data *data)
+{
+    free(data->c);
+    data->c = NULL;
+}
+
+START_TEST(test_vec_dynamic)
+    {
+        vector vec = {0};
+
+        // data will be freed later with the free_char function in the vec_destroy function
+        vec_init(&vec, 0, free_char);
+
+        vec_data new_data1 = {0};
+        new_data1.c = calloc(sizeof("Hello")+1, 1);
+        snprintf(new_data1.c, sizeof("Hello")+1, "%s", "Hello");
+
+        vec_push_back(&vec, new_data1);
+
+        vec_data new_data2 = {0};
+        new_data2.c = calloc(sizeof("World")+1, 1);
+        snprintf(new_data2.c, sizeof("World")+1, "%s", "World");
+
+        vec_push_back(&vec, new_data2);
+
+        vec_data new_data3 = {0};
+        new_data3.c = calloc(sizeof("Test")+1, 1);
+        snprintf(new_data3.c, sizeof("Test")+1, "%s", "Test");
+
+        vec_push_back(&vec, new_data3);
+
+        char *expected[] = {"Hello", "World", "Test"};
+
+        size_t i;
+        for (i = 0; i < vec.size; ++i)
+        {
+            vec_data *data = vec_val_at(&vec, i);
+            ck_assert_ptr_ne(data, NULL);
+            ck_assert_int_eq(strncmp(data->c, expected[i], sizeof(*expected[i])), 0);
+        }
+
+        ck_assert_uint_eq(vec.size, 3);
+
+        vec_destroy(&vec);
+    }
+END_TEST
+
 Suite* vec_suite(void)
 {
     Suite* s;
@@ -251,8 +298,7 @@ Suite* vec_suite(void)
     tcase_add_test(tc_core, test_vec_reserve);
     tcase_add_test(tc_core, test_vec_swap_elem);
     tcase_add_test(tc_core, test_vec_val_at);
-
-    
+    tcase_add_test(tc_core, test_vec_dynamic);
     
     
     suite_add_tcase(s, tc_core);
