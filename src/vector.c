@@ -1,12 +1,12 @@
 #include "vector.h"
 
-int vec_clear(vector* vec)
+int vec_clear(vector *vec)
 {
     if (NULL == vec || vec->size == 0) { return 0; }
 
     if (vec->capacity > VEC_INIT_CAPACITY)
     {
-        vec_data* temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
+        vec_data *temp = (vec_data*) realloc(vec->values, VEC_INIT_CAPACITY);
         if(NULL == temp) { return -1; }
 
         vec->values = temp;
@@ -26,7 +26,7 @@ int vec_clear(vector* vec)
     return 0;
 }
 
-void vec_destroy(vector* vec)
+void vec_destroy(vector *vec)
 {
     if(NULL != vec->values) 
     { 
@@ -37,7 +37,7 @@ void vec_destroy(vector* vec)
     memset(vec, 0, sizeof(vector));
 }
 
-int vec_erase_elem(vector* vec, size_t pos)
+int vec_erase_elem(vector *vec, size_t pos)
 {
     if (NULL == vec->values || pos >= vec->size) { return -1; }
 
@@ -54,12 +54,12 @@ int vec_erase_elem(vector* vec, size_t pos)
     return 0;
 }
 
-int vec_init(vector* vec, size_t capacity)
+int vec_init(vector *vec, size_t capacity)
 {
     if (capacity == 0) { vec->capacity = VEC_INIT_CAPACITY; }
     else { vec->capacity = capacity; }
     
-    vec->values = (vec_data*) malloc(vec->capacity*sizeof(vec_data));
+    vec->values = (vec_data *) malloc(vec->capacity*sizeof(vec_data));
 
     if (NULL == vec->values) { return -1; }
  
@@ -67,7 +67,7 @@ int vec_init(vector* vec, size_t capacity)
     return 0;
 }
 
-int vec_pop_back(vector* vec)
+int vec_pop_back(vector *vec)
 {
     if (NULL == vec || vec->size == 0) { return -1; }
     vec->size--;
@@ -76,7 +76,7 @@ int vec_pop_back(vector* vec)
     return 0;
 }
 
-int vec_push_back(vector* vec, vec_data new_data)
+int vec_push_back(vector *vec, vec_data new_data)
 {
     if (NULL == vec->values) 
     { 
@@ -97,13 +97,13 @@ int vec_push_back(vector* vec, vec_data new_data)
     return 0;
 }
 
-int vec_reserve(vector* vec, size_t capacity)
+int vec_reserve(vector *vec, size_t capacity)
 {
     if (NULL == vec->values) { return vec_init(vec, capacity); }
     if (capacity <= vec->capacity) { return 0; }
 
     vec->capacity = capacity;
-    vec_data* temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
+    vec_data *temp = (vec_data*) realloc(vec->values, vec->capacity*sizeof(vec_data));
     if (NULL == temp) { return -1; }
 
     vec->values = temp;
@@ -111,7 +111,7 @@ int vec_reserve(vector* vec, size_t capacity)
     return 0;
 }
 
-int vec_swap_elem(vector* vec, size_t pos1, size_t pos2)
+int vec_swap_elem(vector *vec, size_t pos1, size_t pos2)
 {
     if (NULL == vec->values || pos1 >= vec->size || pos2 >= vec->size) { return -1; }
 
@@ -122,7 +122,7 @@ int vec_swap_elem(vector* vec, size_t pos1, size_t pos2)
     return 0;
 }
 
-vec_data* vec_val_at(vector* vec, size_t pos)
+vec_data * vec_val_at(vector *vec, size_t pos)
 {
     if (NULL == vec->values || pos >= vec->size) { return NULL; }
 

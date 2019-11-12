@@ -1,12 +1,12 @@
 #include "stack.h"
 
-int stack_clear(stack* s)
+int stack_clear(stack *s)
 {
     if (!s || !s->values || s->size == 0) { return 0; }
 
     if (s->capacity > STACK_INIT_CAPACITY)
     {
-        stack_data* temp = (stack_data*) realloc(s->values, STACK_INIT_CAPACITY);
+        stack_data *temp = (stack_data*) realloc(s->values, STACK_INIT_CAPACITY);
         if(NULL == temp) { return -1; }
 
         s->values = temp;
@@ -26,7 +26,7 @@ int stack_clear(stack* s)
     return 0;
 }
 
-int stack_destroy(stack* s)
+int stack_destroy(stack *s)
 {
     if (!s) { return -1; }
 
@@ -41,14 +41,14 @@ int stack_destroy(stack* s)
     return 0;
 }
 
-int stack_init(stack* s, size_t capacity)
+int stack_init(stack *s, size_t capacity)
 {
     if (!s) { return -1; }
 
     if (capacity == 0) { s->capacity = STACK_INIT_CAPACITY; }
     else { s->capacity = capacity; }
     
-    s->values = (stack_data*) malloc(s->capacity*sizeof(stack_data));
+    s->values = (stack_data *) malloc(s->capacity*sizeof(stack_data));
 
     if (NULL == s->values) { return -1; }
  
@@ -56,7 +56,7 @@ int stack_init(stack* s, size_t capacity)
     return 0;
 }
 
-int stack_push(stack* s, stack_data new_data)
+int stack_push(stack *s, stack_data new_data)
 {
     if (!s) { return -1; }
 
@@ -68,7 +68,7 @@ int stack_push(stack* s, stack_data new_data)
     else if(s->capacity == s->size)
     {
         s->capacity *=2;
-        stack_data* temp = (stack_data*) realloc(s->values, s->capacity*sizeof(stack_data));
+        stack_data *temp = (stack_data *) realloc(s->values, s->capacity*sizeof(stack_data));
         if(NULL == temp) { return -1; }
 
         s->values = temp;
@@ -80,7 +80,7 @@ int stack_push(stack* s, stack_data new_data)
     return 0; 
 }
 
-int stack_pop(stack* s)
+int stack_pop(stack *s)
 {
     if (!s || !s->values || s->size == 0) { return -1; }
     s->size--;
@@ -89,13 +89,13 @@ int stack_pop(stack* s)
     return 0;
 }
 
-int stack_reserve(stack* s, size_t capacity)
+int stack_reserve(stack *s, size_t capacity)
 {
     if (!s || !s->values) { return stack_init(s, capacity); }
     if (capacity <= s->capacity) { return 0; }
 
     s->capacity = capacity;
-    stack_data* temp = (stack_data*) realloc(s->values, s->capacity*sizeof(stack_data));
+    stack_data *temp = (stack_data *) realloc(s->values, s->capacity*sizeof(stack_data));
     if (NULL == temp) { return -1; }
 
     s->values = temp;
@@ -103,7 +103,7 @@ int stack_reserve(stack* s, size_t capacity)
     return 0;
 }
 
-stack_data* stack_top(stack* s)
+stack_data * stack_top(stack *s)
 {
     if (!s || !s->values || s->size == 0) { return NULL; }
 
